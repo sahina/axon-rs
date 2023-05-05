@@ -5,6 +5,42 @@ use uuid::Uuid;
 
 use crate::ddd::constant::ENTITY_ANONYMOUS;
 
+/// Axon Resource Name.
+///
+/// `Arn` is similar in structure to Amazon Resource Names (ARN).
+/// https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+/// Implement this trait on any resource like a `Message` to encode metadata as parts.
+///
+/// # Examples
+///
+/// ```
+/// use axon::ddd::entity::Arn;
+///
+/// struct EmailReceived {
+///     from: String,
+///     to: String,
+///     body: String,
+///     id: usize
+/// }
+///
+/// impl Arn for EmailReceived {
+///     fn arn_string(&self) -> String {
+///         format!("axon:email:from-{}:to-{}/{}", self.from, self.to, self.id)
+///     }
+///
+///     fn arn_name(&self) -> String {
+///         "email".to_owned()
+///     }
+/// }
+/// ```
+pub trait Arn {
+    /// Returns `String` representation of `ARN`
+    fn arn_string(&self) -> String;
+
+    /// Return name of resource
+    fn arn_name(&self) -> String;
+}
+
 /// `Entity` struct defines properties of a unique element.
 #[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct Entity {
@@ -30,7 +66,7 @@ impl Entity {
     ///
     /// let entity = Entity::new("123", "SomeEvent");
     ///
-    /// assert_eq!("123:SomeEvent", format!("{entity}"));
+    /// assert_eq!("SomeEvent:123", format!("{entity}"));
     /// assert_eq!("123", entity.id());
     /// assert_eq!("SomeEvent", entity.name());
     pub fn new(id: impl Into<String>, name: impl Into<String>) -> Self {
@@ -91,7 +127,17 @@ impl From<String> for Entity {
 
 impl Display for Entity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.id, self.name)
+        write!(f, "{}:{}", self.name, self.id)
+    }
+}
+
+impl Arn for Entity {
+    fn arn_string(&self) -> String {
+        format!("arn:{}/{}", self.name, self.id)
+    }
+
+    fn arn_name(&self) -> String {
+        self.name.clone()
     }
 }
 
@@ -100,7 +146,16 @@ mod test_entity {
     use uuid::Uuid;
 
     use crate::ddd::constant::ENTITY_ANONYMOUS;
-    use crate::ddd::entity::Entity;
+    use crate::ddd::entity::{Arn, Entity};
+
+    #[test]
+    fn test_arn() {
+        let id = Uuid::new_v4().to_string();
+        let entity = Entity::new(id, "hello-event");
+
+        assert!(!entity.arn_string().is_empty());
+        assert_eq!("hello-event", entity.arn_name());
+    }
 
     #[test]
     fn default_entity() {
