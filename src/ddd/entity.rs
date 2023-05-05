@@ -3,7 +3,8 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::ddd::constant::ENTITY_ANONYMOUS;
+use crate::ddd::constant::{ENTITY_ANONYMOUS, ENTITY_ID_KEY, ENTITY_NAME_KEY, EVENT_NAME_KEY};
+use crate::ddd::metadata::MetaData;
 
 /// Axon Resource Name.
 ///
@@ -108,6 +109,13 @@ impl Entity {
     pub fn name(&self) -> String {
         self.name.clone()
     }
+
+    pub fn as_metadata(&self) -> MetaData {
+        MetaData::new()
+            .insert(EVENT_NAME_KEY, self.name())
+            .insert(ENTITY_ID_KEY, self.id())
+            .insert(ENTITY_NAME_KEY, self.name())
+    }
 }
 
 impl Default for Entity {
@@ -145,7 +153,7 @@ impl Arn for Entity {
 mod test_entity {
     use uuid::Uuid;
 
-    use crate::ddd::constant::ENTITY_ANONYMOUS;
+    use crate::ddd::constant::{ENTITY_ANONYMOUS, ENTITY_ID_KEY, ENTITY_NAME_KEY};
     use crate::ddd::entity::{Arn, Entity};
 
     #[test]
@@ -172,5 +180,14 @@ mod test_entity {
 
         assert_eq!(e.name, "hello");
         assert_eq!(e.id, id);
+    }
+
+    #[test]
+    fn metadata() {
+        let entity = Entity::new("123", "hello");
+        let metadata = entity.as_metadata();
+
+        assert_eq!(metadata.get(ENTITY_ID_KEY).unwrap(), "123");
+        assert_eq!(metadata.get(ENTITY_NAME_KEY).unwrap(), "hello");
     }
 }

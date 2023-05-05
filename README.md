@@ -3,6 +3,8 @@
 `axon-rs` is 100% inspired from the amazing [Axon Framework](https://www.axoniq.io/axoniq-products). This project
 does not try to be functional replacement in Rust. Please see project goals below for further clarifications.
 
+**In short, this is a toy project to learn how Axon works under the hood by building it in Rust.**
+
 ## Description
 
 To quote from the OG:
@@ -18,6 +20,10 @@ To quote from the OG:
 - Rust semantics and best practices are top priority
 - Single crate contains framework components
 - Server, cloud or server application are out of scope
+
+## Pre-Requisites
+
+Just Rust tools. `rustup` will give everything you need: https://www.rust-lang.org/tools/install
 
 ## Documentation
 

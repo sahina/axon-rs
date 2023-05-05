@@ -3,7 +3,6 @@ use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::ddd::constant::{ENTITY_ID_KEY, ENTITY_NAME_KEY, EVENT_NAME_KEY};
 use crate::ddd::entity::Entity;
 use crate::ddd::metadata::MetaData;
 use crate::message::base::Message;
@@ -60,7 +59,7 @@ impl EventMessage {
     /// ```
     pub fn new(event_name: impl Into<String>, payload: impl Into<Value>) -> Self {
         let identifier = Entity::from_name(event_name);
-        let metadata = MetaData::from(&identifier);
+        let metadata = identifier.as_metadata();
 
         EventMessage {
             identifier,
@@ -97,21 +96,6 @@ impl Message for EventMessage {
 impl Display for EventMessage {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.identifier)
-    }
-}
-
-impl From<&Entity> for MetaData {
-    fn from(value: &Entity) -> Self {
-        MetaData::new()
-            .insert(EVENT_NAME_KEY, value.name())
-            .insert(ENTITY_ID_KEY, value.id())
-            .insert(ENTITY_NAME_KEY, value.name())
-    }
-}
-
-impl From<Entity> for MetaData {
-    fn from(value: Entity) -> Self {
-        value.into()
     }
 }
 
